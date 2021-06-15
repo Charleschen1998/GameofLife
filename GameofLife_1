@@ -1,0 +1,69 @@
+import matplotlib.pyplot as plt
+import numpy as np
+import random
+
+
+class GameOfLife:
+    cells = []
+
+    def __init__(self, size):
+        self.size = size
+
+    def cells_ini(self):
+        self.cells = [[1 if random.random()>0.5 else 0 for i in range(self.size)] for j in range(self.size)]
+
+    def count_nearby_alive(self, x, y):
+        near = [-1,0,1]
+        nearby = 0
+        for dx in near:
+            for dy in near:
+                if dx + x == self.size:
+                    new_x = 0
+                if dy + y == self.size:
+                    new_y = 0
+                if dx + x != self.size and dy + y != self.size:
+                    new_x = dx + x
+                    new_y = dy + y
+                nearby += self.cells[new_x][new_y]
+
+        nearby = nearby - self.cells[x][y]
+
+        return nearby
+
+    def change_status(self, x, y):
+        count = self.count_nearby_alive(x,y)
+        return 1 if count == 3 else (0 if count < 2 or count > 3 else self.cells[x][y])
+
+    def update_whole_cells(self):
+        self.cells = [[self.change_status(x,y) for y in range(self.size)] for x in range(self.size)]
+
+    def plot_it(self):
+
+        time = 0
+        more = 0.8
+        ax.axis([-more,1+more,-more,1+more])
+        while True:
+            time = time + 1
+            ax.cla()
+            ax.axis('square')
+            ax.axis('off')
+            plt.title('Game of Life (Time step '+str(time)+')')
+            self.update_whole_cells()
+            plot_list = (np.array([(i,j) for i in range(self.size) for j in range(self.size) if self.cells[i][j] == 1]) / self.size).transpose()
+            ax.scatter(plot_list[0], plot_list[1], s=1300 / self.size, c='b', marker='s', edgecolors='none')
+            plt.pause(0.01)
+
+
+def run_life_game():
+    global fig, ax
+    fig, ax = plt.subplots()
+    Life = GameOfLife(100)
+    Life.cells_ini()
+    Life.plot_it()
+    plt.grid()
+    plt.show()
+    return None
+
+
+if __name__ == '__main__':
+    run_life_game()
